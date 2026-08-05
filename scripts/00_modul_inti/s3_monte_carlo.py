@@ -45,7 +45,7 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
-import config
+import s1_config as config
 
 
 @dataclass

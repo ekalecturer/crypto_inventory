@@ -26,7 +26,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-import config
+import s1_config as config
 
 # IMPORT NOTE: this used to be `import main as pipeline_main`. After the
 # folder reorg, the backtest driver was renamed 01_main_backtest.py to

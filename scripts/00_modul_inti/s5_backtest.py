@@ -25,7 +25,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-import config
+import s1_config as config
 
 
 @dataclass
@@ -41,7 +41,7 @@ def compute_metrics(policy_result: pd.DataFrame, price_series: pd.Series,
     """
     Daily holding cost is modeled as holding_cost_rate * inventory_value,
     where inventory_value = inventory_end * price_on_that_date. This rate
-    is an explicit assumption (see config.py) - the proposal names
+    is an explicit assumption (see s1_config.py) - the proposal names
     "biaya holding" as a metric but never gives a formula for it. Any
     reviewer should be told this up front, not discover it in the code.
     """

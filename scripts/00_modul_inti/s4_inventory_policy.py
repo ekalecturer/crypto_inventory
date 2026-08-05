@@ -13,7 +13,7 @@ Baseline:
     fixed buffer = BASELINE_BUFFER_PCT * rolling_30d_mean(volume)
     (proposal says "persentase tetap dari rata-rata volume transaksi harian
     30 hari terakhir" but does not name the percentage -> this is a
-    documented assumption in config.py, not something taken from the text.)
+    documented assumption in s1_config.py, not something taken from the text.)
 
 Unchanged from the original Colab pipeline -- this module's logic already
 matches the proposal formulas and was not implicated in either diagnosed
@@ -26,7 +26,7 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
-import config
+import s1_config as config
 
 
 @dataclass

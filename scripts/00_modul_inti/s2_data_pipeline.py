@@ -45,7 +45,7 @@ import numpy as np
 import pandas as pd
 
 # NOTE ON PATH DEPTH: after the Luaran/ folder reorg, this module lives at
-# Luaran/scripts/00_modul_inti/data_pipeline.py -- three levels below Luaran/,
+# Luaran/scripts/00_modul_inti/s2_data_pipeline.py -- three levels below Luaran/,
 # so it takes three .parent hops (not two) to reach Luaran/data/raw.
 RAW_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "raw"
 
@@ -70,7 +70,7 @@ def load_raw_csv(asset_ticker: str) -> pd.DataFrame:
 
     # UNIT FIX: Yahoo Finance's crypto Volume is USD-denominated, not
     # base-asset units. Convert immediately so everything downstream
-    # (monte_carlo.py, inventory_policy.py, backtest.py) is unit-consistent
+    # (s3_monte_carlo.py, s4_inventory_policy.py, s5_backtest.py) is unit-consistent
     # -- see module docstring for the evidence this is actually needed.
     df["volume"] = df["volume"] / df["close"]
 

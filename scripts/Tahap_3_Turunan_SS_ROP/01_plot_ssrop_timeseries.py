@@ -20,10 +20,10 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-import config
-import data_pipeline
-import monte_carlo
-import inventory_policy
+import s1_config as config
+import s2_data_pipeline as data_pipeline
+import s3_monte_carlo as monte_carlo
+import s4_inventory_policy as inventory_policy
 
 # Three .parent hops: this file -> Tahap_3_Turunan_SS_ROP -> scripts -> Luaran
 OUT_DIR = Path(__file__).resolve().parent.parent.parent / "output" / "figures"

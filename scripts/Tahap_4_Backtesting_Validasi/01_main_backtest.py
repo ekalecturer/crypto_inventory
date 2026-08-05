@@ -28,11 +28,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "00_modul_inti")
 import numpy as np
 import pandas as pd
 
-import config
-import data_pipeline
-import monte_carlo
-import inventory_policy
-import backtest
+import s1_config as config
+import s2_data_pipeline as data_pipeline
+import s3_monte_carlo as monte_carlo
+import s4_inventory_policy as inventory_policy
+import s5_backtest as backtest
 
 
 def synthetic_price_volume(start_date: str, end_date: str, seed: int = 42,

@@ -52,9 +52,9 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-import config
-import data_pipeline
-import monte_carlo
+import s1_config as config
+import s2_data_pipeline as data_pipeline
+import s3_monte_carlo as monte_carlo
 
 
 def validate_asset(asset: str) -> dict:

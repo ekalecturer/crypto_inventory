@@ -7,7 +7,7 @@ operasional harian yang dideskripsikan proposal 3.7: operator memasukkan
 level inventori BTC/ETH SAAT INI, alat menampilkan SS terkini, ROP terkini,
 dan rekomendasi pengisian ulang (ya/tidak).
 
-SUMBER DATA: LIVE dari Yahoo Finance (via scripts/live_data.py), BUKAN CSV
+SUMBER DATA: LIVE dari Yahoo Finance (via scripts/00_modul_inti/s6_live_data.py), BUKAN CSV
 lokal di data/raw/. Perubahan ini disengaja agar alat ini bisa dijalankan
 dari repo yang di-deploy/di-clone di mesin mana pun dengan akses internet
 (termasuk GitHub Actions runner) tanpa harus menjalankan skrip fetch
@@ -48,11 +48,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "00_modul_inti")
 
 import numpy as np
 
-import config
-import data_pipeline
-import monte_carlo
-import inventory_policy
-import live_data
+import s1_config as config
+import s2_data_pipeline as data_pipeline
+import s3_monte_carlo as monte_carlo
+import s4_inventory_policy as inventory_policy
+import s6_live_data as live_data
 
 
 def load_data_for_tool(asset: str, local: bool):
@@ -133,7 +133,7 @@ def print_human(asset: str, result: dict, source: str):
     print(f"  Elastisitas (beta)      : {result['elasticity']:.4f}")
     if result["n_exponent_clipped"] > 0:
         print(f"  [PERINGATAN] exponent clip kena {result['n_exponent_clipped']}x -- "
-              f"lihat monte_carlo.py")
+              f"lihat s3_monte_carlo.py")
     print(f"{'-'*58}")
     if result["restock_recommended"]:
         print(f"  REKOMENDASI: >>> LAKUKAN PENGISIAN ULANG SEKARANG <<<")

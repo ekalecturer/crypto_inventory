@@ -1,5 +1,5 @@
 """
-Unit tests for the elasticity-scaling bug fix in scripts/monte_carlo.py.
+Unit tests for the elasticity-scaling bug fix in scripts/00_modul_inti/s3_monte_carlo.py.
 
 Run before touching real data (per Fase 0 step 1):
     cd Luaran/tests
@@ -16,12 +16,12 @@ the clipped version stays finite and bounded under the same conditions.
 import sys
 from pathlib import Path
 
-# PATH FIX (post folder-reorg): monte_carlo.py now lives in
-# Luaran/scripts/00_modul_inti/, not directly under scripts/.
+# PATH FIX (post folder-reorg): the monte carlo module now lives at
+# Luaran/scripts/00_modul_inti/s3_monte_carlo.py, not directly under scripts/.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts" / "00_modul_inti"))
 
 import numpy as np
-import monte_carlo
+import s3_monte_carlo as monte_carlo
 
 
 def test_original_unclipped_formula_overflows():

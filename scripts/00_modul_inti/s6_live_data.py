@@ -20,8 +20,8 @@ from __future__ import annotations
 
 import pandas as pd
 
-import config
-import data_pipeline
+import s1_config as config
+import s2_data_pipeline as data_pipeline
 
 
 def fetch_live_asset_data(asset: str, period_days: int = 400) -> pd.DataFrame:
@@ -29,7 +29,7 @@ def fetch_live_asset_data(asset: str, period_days: int = 400) -> pd.DataFrame:
     Ambil dan pra-proses `period_days` hari terakhir data harian untuk
     `asset` ("BTC" atau "ETH") langsung dari yfinance.
 
-    Menerapkan perbaikan unit yang sama seperti data_pipeline.py:
+    Menerapkan perbaikan unit yang sama seperti s2_data_pipeline.py:
     field Volume yfinance untuk ticker kripto adalah dalam USD, bukan
     unit koin -- dikonversi di sini sebelum dikembalikan.
 
@@ -63,7 +63,7 @@ def fetch_live_asset_data(asset: str, period_days: int = 400) -> pd.DataFrame:
     raw.index.name = "date"
     raw.index = pd.to_datetime(raw.index).tz_localize(None).normalize()
 
-    # UNIT FIX: sama seperti data_pipeline.py -- volume yfinance untuk
+    # UNIT FIX: sama seperti s2_data_pipeline.py -- volume yfinance untuk
     # ticker kripto dalam USD, bukan unit koin.
     raw["volume"] = raw["volume"] / raw["close"]
 

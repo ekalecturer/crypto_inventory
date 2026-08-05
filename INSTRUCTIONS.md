@@ -26,7 +26,7 @@ dua masalah yang pipeline ini memperbaiki:
 2. **ETH**: bug numerik pada fungsi elastisitas permintaan (`exp(elasticity * r)`
    tanpa batas) meledak saat window walk-forward menyerap return ekstrem era
    krisis (mis. keruntuhan FTX, ~-55% dalam satu hari). **Ini yang sudah
-   diperbaiki** di `scripts/00_modul_inti/monte_carlo.py` (lihat docstring "BUG FIX"
+   diperbaiki** di `scripts/00_modul_inti/s3_monte_carlo.py` (lihat docstring "BUG FIX"
    di file itu) — exponent-nya sekarang dibatasi (clipped) ke ±10 sebelum di-exponensial-kan.
 
 **Dua bug tambahan ditemukan saat menjalankan pipeline ini pada data riil
@@ -37,7 +37,7 @@ dua masalah yang pipeline ini memperbaiki:
    2022-01-01 tercatat ~24,6 miliar, padahal total suplai BTC hanya ~19 juta
    koin. Tanpa dikonversi, semua angka inventori/demand/holding cost di hilir
    akan salah dengan faktor sebesar harga aset. **Sudah diperbaiki** di
-   `scripts/00_modul_inti/data_pipeline.py`: `volume = volume_usd / close`.
+   `scripts/00_modul_inti/s2_data_pipeline.py`: `volume = volume_usd / close`.
 4. **Bug overwrite pada export**: menjalankan `--asset BTC` lalu `--asset ETH`
    terpisah (seperti instruksi langkah 5 versi lama) membuat baris BTC di
    `metrics_summary.csv` tertimpa hilang oleh run ETH. **Sudah diperbaiki**
@@ -78,12 +78,14 @@ inventori_hibah_pipeline/
     │   └── processed/                 <- (tidak dipakai otomatis; processed data in-memory)
     ├── scripts/
     │   ├── 00_modul_inti/             <- modul bersama, dipakai semua Tahap
-    │   │   ├── config.py              <- konstanta, dengan komentar sumber (proposal vs asumsi)
-    │   │   ├── data_pipeline.py       <- load CSV lokal + preprocessing (gap, log-return)
-    │   │   ├── monte_carlo.py         <- bootstrap MC + elasticity scaling (SUDAH DIPERBAIKI)
-    │   │   ├── inventory_policy.py    <- SS/ROP dinamis + baseline fixed buffer
-    │   │   ├── backtest.py            <- metrik + paired t-test
-    │   │   └── live_data.py           <- fetch live yfinance (dipakai Tahap 5)
+    │   │   ├── s1_config.py           <- konstanta, dengan komentar sumber (proposal vs asumsi)
+    │   │   ├── s2_data_pipeline.py    <- load CSV lokal + preprocessing (gap, log-return)
+    │   │   ├── s3_monte_carlo.py      <- bootstrap MC + elasticity scaling (SUDAH DIPERBAIKI)
+    │   │   ├── s4_inventory_policy.py <- SS/ROP dinamis + baseline fixed buffer
+    │   │   ├── s5_backtest.py         <- metrik + paired t-test
+    │   │   └── s6_live_data.py        <- fetch live yfinance (dipakai Tahap 5)
+    │   │       (penomoran s1-s6 = urutan pakai; prefiks huruf karena modul
+    │   │        Python tidak bisa diawali angka dan diimpor langsung)
     │   ├── Tahap_1_Pengumpulan_Data/
     │   │   └── 01_fetch_yfinance_LOCAL.py   <- HARUS dijalankan di luar sandbox, ada internet
     │   ├── Tahap_2_Model_Simulasi/

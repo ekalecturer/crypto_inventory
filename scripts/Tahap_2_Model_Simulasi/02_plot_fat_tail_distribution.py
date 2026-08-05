@@ -22,8 +22,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from scipy import stats
 
-import config
-import data_pipeline
+import s1_config as config
+import s2_data_pipeline as data_pipeline
 
 # Three .parent hops: this file -> Tahap_2_Model_Simulasi -> scripts -> Luaran
 OUT_DIR = Path(__file__).resolve().parent.parent.parent / "output" / "figures"

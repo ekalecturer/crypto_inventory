@@ -12,7 +12,7 @@ CHANGE LOG vs the original Colab pipeline (crypto_inventory_mc_colab.ipynb):
     calibration window, which must include the FTX collapse). See
     docs/DATA_SPEC.md for the full rationale.
   - Added EXPONENT_CLIP to bound the elasticity scaling exponent in
-    monte_carlo.py (see that module's docstring for why).
+    s3_monte_carlo.py (see that module's docstring for why).
 """
 
 # --- 3.3 Data collection ---

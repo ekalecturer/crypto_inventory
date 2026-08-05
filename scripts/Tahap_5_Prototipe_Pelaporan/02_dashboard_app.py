@@ -7,7 +7,7 @@ nilai ROP terkini, rekomendasi pengisian ulang (lakukan pengisian sekarang
 atau tahan), serta grafik tren level inventori terhadap SS dan ROP selama
 30 hari terakhir."
 
-SUMBER DATA: LIVE dari Yahoo Finance (via scripts/live_data.py), BUKAN CSV
+SUMBER DATA: LIVE dari Yahoo Finance (via scripts/00_modul_inti/s6_live_data.py), BUKAN CSV
 lokal di data/raw/. Diubah agar dasbor ini bisa langsung di-deploy dari
 repo GitHub (mis. Streamlit Community Cloud, yang menjalankan app ini di
 server dengan akses internet penuh) tanpa perlu menjalankan skrip fetch
@@ -52,10 +52,10 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-import config
-import monte_carlo
-import inventory_policy
-import live_data
+import s1_config as config
+import s3_monte_carlo as monte_carlo
+import s4_inventory_policy as inventory_policy
+import s6_live_data as live_data
 
 st.set_page_config(page_title="Dasbor Inventori Kripto -- SS/ROP", layout="wide")
 
