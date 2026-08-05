@@ -1,0 +1,19 @@
+======================================================================
+KS VALIDATION (Tahap 2 indicator)
+======================================================================
+
+BTC:
+  KS statistic = 0.0086, p-value = 1.0000
+  Fails to reject H0 (same distribution) at alpha=0.05: True
+  Historical excess kurtosis: 4.43  (>0 = fat-tailed vs normal)
+  Bootstrapped excess kurtosis: 4.63
+  Both fat-tailed: True
+
+ETH:
+  KS statistic = 0.0109, p-value = 0.9997
+  Fails to reject H0 (same distribution) at alpha=0.05: True
+  Historical excess kurtosis: 4.34  (>0 = fat-tailed vs normal)
+  Bootstrapped excess kurtosis: 4.65
+  Both fat-tailed: True
+
+Wrote /sessions/wonderful-friendly-carson/mnt/inventori_hibah_pipeline/output/tables/ks_validation.csv

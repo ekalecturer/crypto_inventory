@@ -1,0 +1,23 @@
+# Dependencies untuk decision_tool_cli.py, dashboard_app.py, dan pipeline
+# backtest (main.py dkk). Satu file di root repo ini supaya:
+#   - Streamlit Community Cloud otomatis mendeteksinya saat deploy
+#     dashboard_app.py
+#   - GitHub Actions (.github/workflows/daily_update.yml) atau siapa pun
+#     yang clone repo bisa langsung `pip install -r requirements.txt`
+
+pandas>=2.0
+numpy>=1.24
+scipy>=1.10
+yfinance>=0.2.40
+
+# Hanya dipakai oleh dashboard_app.py -- tetap disertakan di sini (bukan
+# file terpisah) supaya Streamlit Community Cloud, yang hanya membaca satu
+# requirements.txt di root, bisa men-deploy dasbor tanpa langkah tambahan.
+streamlit>=1.38
+plotly>=5.22
+
+# Hanya dipakai oleh main.py/plot_tahap*.py untuk grafik output Tahap 2-4
+# (opsional untuk decision_tool_cli.py / dashboard_app.py saja, tapi
+# disertakan supaya `pip install -r requirements.txt` cukup untuk seluruh
+# repo, bukan cuma dua file ini)
+matplotlib>=3.8

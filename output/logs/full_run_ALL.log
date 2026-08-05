@@ -1,0 +1,42 @@
+[BTC] estimated price-demand elasticity (beta): -1.0552
+
+============================================================
+  BACKTEST REPORT: BTC  (365 trading days)
+============================================================
+Metric                         Proposed (MC)  Baseline (fixed)
+Stockout rate                         8.49%            33.70%
+Mean daily holding cost           6740509.87        2339719.14
+Restock frequency                   100.00%           100.00%
+Total stockout amount              6228782.1        21629895.9
+
+--- Paired t-test (alpha=0.05) ---
+Stockout rate: t=-10.767, p=0.0000, significant=True, proposed_lower=True
+Holding cost: t=32.579, p=0.0000, significant=True, proposed_lower=False
+Restock frequency (reported, not a criterion): t=nan, p=nan, significant=False, proposed_lower=False
+
+Exponent clip hits during backtest: 0
+Verdict: Proposal's superiority criterion NOT met - at least one of {stockout rate, holding cost} is not significantly lower than baseline.
+[ETH] estimated price-demand elasticity (beta): -1.0839
+
+============================================================
+  BACKTEST REPORT: ETH  (365 trading days)
+============================================================
+Metric                         Proposed (MC)  Baseline (fixed)
+Stockout rate                        61.92%            32.05%
+Mean daily holding cost            427342.45        1255350.29
+Restock frequency                    99.73%           100.00%
+Total stockout amount            853887472.5       389440545.5
+
+--- Paired t-test (alpha=0.05) ---
+Stockout rate: t=12.449, p=0.0000, significant=True, proposed_lower=False
+Holding cost: t=-17.783, p=0.0000, significant=True, proposed_lower=True
+Restock frequency (reported, not a criterion): t=-1.000, p=0.3180, significant=False, proposed_lower=True
+
+Exponent clip hits during backtest: 0
+Verdict: Proposal's superiority criterion NOT met - at least one of {stockout rate, holding cost} is not significantly lower than baseline.
+
+Exported: ../output/tables/metrics_summary.csv
+  ../output/tables/BTC_proposed_daily.csv
+  ../output/tables/BTC_baseline_daily.csv
+  ../output/tables/ETH_proposed_daily.csv
+  ../output/tables/ETH_baseline_daily.csv

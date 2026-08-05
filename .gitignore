@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Debug/backup artifacts -- not meant for a public research repo
+output/_smoke_test_do_not_use/
+output/_corrupted_excel_resave_backup/
+
+# OS/sync cruft
+desktop.ini
+.DS_Store

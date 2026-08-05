@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Optimasi Inventori Kripto — Hasil Backtest (Bootstrap-MC / SS-ROP)</title>
+<style>
+  :root {
+    --navy: #1E2761;
+    --ice: #CADCFC;
+    --accent: #F2A65A;
+    --grey: #5B6472;
+    --red: #B3261E;
+    --green: #1B7A43;
+    --bg: #F7F8FA;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: #1a1a2e;
+    line-height: 1.55;
+  }
+  header {
+    background: var(--navy);
+    color: #fff;
+    padding: 2.5rem 1.5rem 2rem;
+  }
+  header .wrap { max-width: 1000px; margin: 0 auto; }
+  header h1 { margin: 0 0 0.4rem; font-size: 1.6rem; font-weight: 700; }
+  header p { margin: 0.2rem 0; color: var(--ice); font-size: 0.95rem; }
+  .badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #1a1a2e;
+    font-weight: 600;
+    font-size: 0.78rem;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    margin-top: 0.6rem;
+  }
+  main { max-width: 1000px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  section { margin-bottom: 3rem; }
+  h2 {
+    color: var(--navy);
+    border-bottom: 2px solid var(--ice);
+    padding-bottom: 0.4rem;
+    font-size: 1.25rem;
+  }
+  h3 { color: var(--navy); font-size: 1.05rem; margin-top: 1.6rem; }
+  .note {
+    background: #fff;
+    border-left: 4px solid var(--accent);
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+    color: var(--grey);
+    margin: 1rem 0;
+    border-radius: 0 6px 6px 0;
+  }
+  .note.warn { border-left-color: var(--red); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    font-size: 0.88rem;
+    margin: 1rem 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  th, td { text-align: left; padding: 0.55rem 0.7rem; border-bottom: 1px solid #e8e8ee; }
+  th { background: var(--navy); color: #fff; font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .sig-yes { color: var(--green); font-weight: 600; }
+  .sig-no { color: var(--red); font-weight: 600; }
+  .verdict {
+    background: #fff;
+    border: 1px solid #e8e8ee;
+    border-radius: 8px;
+    padding: 1rem 1.2rem;
+    margin: 1rem 0;
+    font-size: 0.92rem;
+  }
+  .verdict strong { color: var(--red); }
+  .figures { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+  .figures figure { margin: 0; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .figures img { width: 100%; display: block; }
+  .figures figcaption { padding: 0.6rem 0.8rem; font-size: 0.82rem; color: var(--grey); }
+  @media (max-width: 700px) { .figures { grid-template-columns: 1fr; } }
+  footer {
+    max-width: 1000px; margin: 0 auto; padding: 1.5rem;
+    color: var(--grey); font-size: 0.82rem; border-top: 1px solid #e8e8ee;
+  }
+  a { color: var(--navy); }
+  code { background: #eef0f5; padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.85em; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>Optimasi Pengisian Ulang Inventori Aset Kripto pada Bursa Terpusat</h1>
+    <p>Simulasi Monte Carlo (Bootstrap) — Pendekatan Safety Stock &amp; Reorder Point</p>
+    <p>Hibah Penelitian LPPM ITK · 2026 · Backtest 2025 (data kalibrasi 2022–2024)</p>
+    <span class="badge">Hasil final terkonfirmasi — 30 Jul 2026</span>
+  </div>
+</header>
+
+<main>
+
+<section id="ringkasan">
+  <h2>Ringkasan</h2>
+  <p>
+    Halaman ini adalah rekaman statis dari hasil Tahap 2–4 pipeline: validasi model
+    simulasi (Kolmogorov–Smirnov + fat-tail), turunan parameter Safety Stock (SS) /
+    Reorder Point (ROP) harian, dan backtest kebijakan proposed (Monte Carlo dinamis)
+    versus baseline (buffer tetap) sepanjang tahun 2025 untuk BTC dan ETH.
+  </p>
+  <div class="note">
+    Ini adalah snapshot statis, bukan dasbor live. Untuk alat keputusan interaktif
+    dengan data live dari Yahoo Finance, lihat dasbor Streamlit yang ditautkan di
+    bagian bawah halaman ini.
+  </div>
+</section>
+
+<section id="tahap2">
+  <h2>Tahap 2 — Validasi Model Simulasi</h2>
+  <p>
+    Uji Kolmogorov–Smirnov dua-sampel antara distribusi log-return historis (window
+    kalibrasi 2022–2024) dan distribusi hasil bootstrap Monte Carlo, plus kurtosis
+    berlebih (excess kurtosis) untuk konfirmasi karakteristik fat-tail.
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>Aset</th><th class="num">n historis</th><th class="num">n bootstrap</th>
+        <th class="num">Statistik KS</th><th class="num">p-value</th>
+        <th>Gagal tolak H0 (α=0.05)</th>
+        <th class="num">Kurtosis historis</th><th class="num">Kurtosis bootstrap</th>
+        <th>Fat-tail (keduanya)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>BTC</td><td class="num">1.095</td><td class="num">10.000</td>
+        <td class="num">0.0086</td><td class="num">0.99999...</td>
+        <td class="sig-yes">Ya</td>
+        <td class="num">4.43</td><td class="num">4.63</td>
+        <td class="sig-yes">Ya</td>
+      </tr>
+      <tr>
+        <td>ETH</td><td class="num">1.095</td><td class="num">10.000</td>
+        <td class="num">0.0109</td><td class="num">0.99971</td>
+        <td class="sig-yes">Ya</td>
+        <td class="num">4.34</td><td class="num">4.65</td>
+        <td class="sig-yes">Ya</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="note">
+    Uji KS di atas membandingkan bootstrap terhadap sampel historis yang sama
+    (bootstrap ditarik dengan penggantian dari populasi itu sendiri) — ini cek
+    implementasi yang sah (memastikan sampling tidak bias), bukan bukti independen
+    bahwa proses fat-tail adalah model realistis. Kurtosis berlebih &gt; 0 pada
+    kedua distribusi adalah klaim kualitatif yang lebih bermakna: menunjukkan ekor
+    distribusi lebih tebal dari normal, sesuai indikator capaian proposal.
+  </div>
+  <div class="figures">
+    <figure>
+      <img src="output/figures/tahap2_BTC_fat_tail.png" alt="BTC: distribusi log-return historis vs bootstrap MC">
+      <figcaption>BTC — distribusi log-return historis vs bootstrap MC</figcaption>
+    </figure>
+    <figure>
+      <img src="output/figures/tahap2_ETH_fat_tail.png" alt="ETH: distribusi log-return historis vs bootstrap MC">
+      <figcaption>ETH — distribusi log-return historis vs bootstrap MC</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="tahap3">
+  <h2>Tahap 3 — Turunan Safety Stock / Reorder Point</h2>
+  <p>
+    Parameter SS<sub>t</sub> dan ROP<sub>t</sub> dihitung harian secara walk-forward
+    (expanding window) sepanjang periode backtest 2025, dari hasil simulasi Monte
+    Carlo N=10.000 skenario per hari, lead time L=1 hari, tingkat layanan 95%
+    (Z=1.645).
+  </p>
+  <div class="figures">
+    <figure>
+      <img src="output/figures/tahap3_BTC_ssrop_timeseries.png" alt="BTC: parameter SS/ROP harian 2025">
+      <figcaption>BTC — SS/ROP harian, backtest 2025 (β elastisitas = -1.0552)</figcaption>
+    </figure>
+    <figure>
+      <img src="output/figures/tahap3_ETH_ssrop_timeseries.png" alt="ETH: parameter SS/ROP harian 2025">
+      <figcaption>ETH — SS/ROP harian, backtest 2025 (β elastisitas = -1.0839)</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="tahap4">
+  <h2>Tahap 4 — Backtesting &amp; Validasi</h2>
+  <p>
+    Kebijakan proposed (SS/ROP dinamis Monte Carlo) dibandingkan terhadap baseline
+    (buffer tetap 110% dari rata-rata volume rolling 30 hari) pada 365 hari
+    perdagangan 2025, per aset. Kriteria superioritas proposal: stockout rate DAN
+    biaya holding harus signifikan lebih rendah secara bersamaan (paired t-test,
+    α=0.05).
+  </p>
+
+  <h3>Tabel ringkasan metrik</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Aset</th><th>Metrik</th>
+        <th class="num">Proposed</th><th class="num">Baseline</th>
+        <th class="num">p-value</th><th>Signifikan</th>
+        <th class="num">β elastisitas</th><th class="num">Exponent clip kena</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>BTC</td><td>Stockout rate</td><td class="num">8,49%</td><td class="num">33,70%</td><td class="num">1,18×10⁻²³</td><td class="sig-yes">Ya (proposed lebih baik)</td><td class="num">-1,0552</td><td class="num">0</td></tr>
+      <tr><td>BTC</td><td>Biaya holding harian (rata-rata)</td><td class="num">6.740.510</td><td class="num">2.339.719</td><td class="num">6,16×10⁻¹¹⁰</td><td class="sig-no">Ya (proposed lebih buruk)</td><td class="num">-1,0552</td><td class="num">0</td></tr>
+      <tr><td>BTC</td><td>Restock frequency</td><td class="num">100,00%</td><td class="num">100,00%</td><td class="num">—</td><td>bukan kriteria</td><td class="num">-1,0552</td><td class="num">0</td></tr>
+      <tr><td>ETH</td><td>Stockout rate</td><td class="num">61,92%</td><td class="num">32,05%</td><td class="num">6,97×10⁻³⁰</td><td class="sig-no">Ya (proposed lebih buruk)</td><td class="num">-1,0839</td><td class="num">0</td></tr>
+      <tr><td>ETH</td><td>Biaya holding harian (rata-rata)</td><td class="num">427.342</td><td class="num">1.255.350</td><td class="num">2,30×10⁻⁵¹</td><td class="sig-yes">Ya (proposed lebih baik)</td><td class="num">-1,0839</td><td class="num">0</td></tr>
+      <tr><td>ETH</td><td>Restock frequency</td><td class="num">99,73%</td><td class="num">100,00%</td><td class="num">0,318</td><td>tidak signifikan</td><td class="num">-1,0839</td><td class="num">0</td></tr>
+    </tbody>
+  </table>
+
+  <div class="verdict">
+    <strong>Verdict:</strong> Kriteria superioritas proposal <strong>TIDAK terpenuhi</strong>
+    untuk kedua aset. Pola trade-off berlawanan arah: BTC menang signifikan di
+    proteksi stockout tapi kalah signifikan di biaya holding; ETH sebaliknya — kalah
+    di stockout, menang di biaya holding. Ini dilaporkan apa adanya sebagai temuan
+    riil (bukan hasil yang "diperbaiki" agar sesuai hipotesis proposal).
+  </div>
+
+  <div class="note">
+    Exponent clip (±10 pada monte_carlo.py) tidak pernah kena pada data riil untuk
+    kedua aset — fix bug numerik yang mendasarinya sudah dibuktikan aman lewat unit
+    test, dan pada run nyata ini tidak membatasi hasil apa pun.
+  </div>
+
+  <h3>Trajektori inventori vs SS/ROP (kebijakan proposed)</h3>
+  <div class="figures">
+    <figure>
+      <img src="output/figures/tahap4_BTC_inventory_trajectory.png" alt="BTC: trajektori inventori vs SS/ROP 2025">
+      <figcaption>BTC — trajektori inventori, backtest 2025</figcaption>
+    </figure>
+    <figure>
+      <img src="output/figures/tahap4_ETH_inventory_trajectory.png" alt="ETH: trajektori inventori vs SS/ROP 2025">
+      <figcaption>ETH — trajektori inventori, backtest 2025</figcaption>
+    </figure>
+  </div>
+
+  <h3>Perbandingan proposed vs baseline</h3>
+  <div class="figures">
+    <figure>
+      <img src="output/figures/tahap4_BTC_metrics_comparison.png" alt="BTC: perbandingan metrik proposed vs baseline">
+      <figcaption>BTC — proposed vs baseline, tiga metrik utama</figcaption>
+    </figure>
+    <figure>
+      <img src="output/figures/tahap4_ETH_metrics_comparison.png" alt="ETH: perbandingan metrik proposed vs baseline">
+      <figcaption>ETH — proposed vs baseline, tiga metrik utama</figcaption>
+    </figure>
+  </div>
+
+  <div class="note warn">
+    <code>total_stockout_amount</code> dan metrik absolut lainnya memakai volume
+    gabungan multi-bursa (proksi demand dari data yfinance), bukan order book satu
+    CEX riil — jangan dikutip sebagai ukuran reserve exchange tertentu. Yang
+    bermakna secara statistik adalah perbandingan proposed-vs-baseline, bukan angka
+    absolutnya.
+  </div>
+</section>
+
+<section id="alat">
+  <h2>Alat operasional (tidak di-host di halaman ini)</h2>
+  <p>
+    Dua alat operasional dari Tahap 5 memakai data <strong>live</strong> dari Yahoo
+    Finance dan butuh runtime Python — keduanya tidak bisa berjalan di GitHub Pages
+    (hosting statis saja), jadi ditautkan sebagai layanan terpisah:
+  </p>
+  <ul>
+    <li>
+      <strong>Dasbor interaktif</strong> (input inventori → rekomendasi restock
+      real-time) — deploy di Streamlit Community Cloud. Tautan akan ditambahkan di
+      sini setelah repo di-deploy.
+    </li>
+    <li>
+      <strong>Alat CLI</strong> (<code>scripts/Tahap_5_Prototipe_Pelaporan/01_decision_tool_cli.py</code>) —
+      dijalankan dari terminal pada mesin dengan akses internet; lihat
+      <a href="INSTRUCTIONS.md">INSTRUCTIONS.md</a>.
+    </li>
+  </ul>
+</section>
+
+</main>
+
+<footer>
+  Sumber data: Yahoo Finance (BTC-USD, ETH-USD), 2022-01-01 s/d 2025-12-31 · Kode
+  sumber lengkap dan log eksekusi ada di repo ini
+  (<code>scripts/</code>, <code>output/logs/</code>) · Dibuat untuk hibah LPPM ITK 2026.
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+# Tahap 5 -- Update harian data dasbor (arsitektur: GH Actions -> JSON statis).
+#
+# BELUM DIAKTIFKAN secara operasional -- file ini disiapkan sesuai permintaan,
+# tapi belum ada repo GitHub publik yang menjalankannya. Sebelum mengaktifkan:
+#   1. Push ISI folder Luaran/ (bukan seluruh inventori_hibah_pipeline/) sebagai
+#      root repo GitHub -- requirements.txt, data/, scripts/, .github/ semua
+#      sudah relatif terhadap Luaran/ setelah reorganisasi folder proyek.
+#   2. Konfirmasi arsitektur: publik/demo (lag 1 hari, OK) vs near-real-time
+#      (arsitektur ini TIDAK cocok -- perlu Vercel Cron/Edge Function, lihat
+#      catatan di generate_dashboard_json.py).
+#   3. Pastikan Settings > Actions > General > Workflow permissions diset ke
+#      "Read and write permissions" agar langkah commit di bawah bisa push.
+#
+# Yang dilakukan workflow ini:
+#   - Berjalan setiap hari jam 00:10 UTC (~07:10 WITA)
+#   - Instal dependencies, jalankan generate_dashboard_json.py (butuh akses
+#     internet ke Yahoo Finance -- GitHub Actions runner punya ini, berbeda
+#     dari sandbox Cowork yang diblokir)
+#   - Commit data/latest.json yang baru kembali ke repo jika berubah
+#   - Frontend (Next.js/HTML statis di Vercel) tinggal fetch raw file ini,
+#     tidak perlu runtime Python di Vercel
+
+name: Update Dashboard Data
+
+on:
+  schedule:
+    - cron: "10 0 * * *"   # setiap hari 00:10 UTC
+  workflow_dispatch: {}     # tombol "Run workflow" manual di tab Actions
+
+permissions:
+  contents: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate dashboard JSON
+        working-directory: scripts/Tahap_5_Prototipe_Pelaporan
+        run: python 03_generate_dashboard_json.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/latest.json
+          git diff --staged --quiet || git commit -m "chore: update dashboard data $(date -u +%Y-%m-%d)"
+          git push
