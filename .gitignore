@@ -36,3 +36,6 @@ HANDOVER*
 # unduh ulang sesuai README, jangan diredistribusi dari repo ini
 data/raw/Binance_*_1h.csv
 data/raw/gemini_*.csv
+
+# Naskah artikel (belum terbit)
+draft artikel*
