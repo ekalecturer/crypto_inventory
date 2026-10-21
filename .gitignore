@@ -8,6 +8,31 @@ venv/
 output/_smoke_test_do_not_use/
 output/_corrupted_excel_resave_backup/
 
+# Internal pickle checkpoints from Tahap 6 (per-asset resumability across
+# long-running backtest calls) -- not a research artifact, regenerable by
+# re-running scripts/Tahap_6_Robustness_Hourly/01_run_hourly_robustness.py
+output_hourly/_checkpoints/
+
 # OS/sync cruft
 desktop.ini
 .DS_Store
+
+# Dokumen non-publik: hak cipta (data pencipta), naskah belum terbit,
+# presentasi/poster, catatan internal. Repo ini publik.
+Surat_*Hak_Cipta*.docx
+*Hak_Cipta*
+*.docx
+*.pptx
+Poster_Infografis_*.pdf
+*PROMPT*
+HANDOVER*
+*logbook*
+*Logbook*
+*notulen*
+*Notulen*
+~$*
+
+# Data per jam pihak ketiga (CryptoDataDownload, CC BY-NC-SA 4.0) --
+# unduh ulang sesuai README, jangan diredistribusi dari repo ini
+data/raw/Binance_*_1h.csv
+data/raw/gemini_*.csv
