@@ -1,0 +1,3 @@
+asset,n_historical,n_bootstrapped,ks_statistic,ks_pvalue,ks_fails_to_reject_h0_at_0.05,historical_excess_kurtosis,bootstrapped_excess_kurtosis,both_fat_tailed
+BTC,26280,10000,0.004739421613394218,0.996612574105011,True,13.46224826140607,15.02688863315429,True
+ETH,26280,10000,0.008409893455098905,0.6815576931404015,True,15.263879579731103,19.892915995838017,True
