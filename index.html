@@ -118,8 +118,7 @@
   </p>
   <div class="note">
     Ini adalah snapshot statis, bukan dasbor live. Untuk alat keputusan interaktif
-    dengan data live dari Yahoo Finance, lihat dasbor Streamlit yang ditautkan di
-    bagian bawah halaman ini.
+    dengan data live dari Yahoo Finance, lihat bagian "Alat operasional" di bawah.
   </div>
 </section>
 
@@ -274,18 +273,72 @@
   </div>
 </section>
 
+<section id="tahap6">
+  <h2>Tahap 6 — Uji Ketahanan pada Data Per Jam</h2>
+  <div class="note">
+    Uji ketahanan tambahan <strong>di luar proposal asli</strong>. Hasil utama
+    penelitian tetap backtest harian pada Tahap 4 di atas.
+  </div>
+  <p>
+    Metodologi Tahap 2–4 diulang pada candlestick 1 jam (CryptoDataDownload, Binance
+    BTCUSDT/ETHUSDT). Parameter: lead time L = 24 periode jam (1 hari kalender),
+    baseline rolling 720 jam, biaya holding per jam = biaya harian / 24, ambang gap
+    72 jam, N = 10.000 skenario per periode, kalibrasi 2022–2024, backtest penuh 2025
+    tanpa subsampel (8.657 periode BTC, 8.609 periode ETH). Elastisitas diestimasi
+    ulang dari data jam: β BTC = -2,1513, β ETH = -3,0304.
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>Aset</th>
+        <th class="num">Stockout proposed</th><th class="num">Stockout baseline</th>
+        <th class="num">Biaya holding/jam proposed</th><th class="num">Biaya holding/jam baseline</th>
+        <th class="num">p-value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>BTC</td><td class="num">0,00%</td><td class="num">27,25%</td><td class="num">71.080</td><td class="num">296</td><td class="num">&lt; 0,001</td></tr>
+      <tr><td>ETH</td><td class="num">0,01%</td><td class="num">27,92%</td><td class="num">12.660</td><td class="num">235</td><td class="num">&lt; 0,001</td></tr>
+    </tbody>
+  </table>
+  <p>
+    Pembanding harian (Tahap 4): stockout BTC 8,49% vs 33,70%; ETH 61,92% vs 32,05%.
+  </p>
+  <div class="verdict">
+    <strong>Kesimpulan:</strong> kesimpulan kualitatif sama dengan hasil harian —
+    kriteria superioritas <strong>tidak terpenuhi</strong> pada kedua aset. Pola
+    trade-off-nya berubah: stockout mendekati nol dengan biaya holding jauh lebih
+    tinggi, sehingga hasil sensitif terhadap resolusi data.
+  </div>
+  <div class="figures">
+    <figure>
+      <img src="output_hourly/figures/langkah4_BTC_trajectory_hourly.png" alt="BTC: trajektori inventori per jam, backtest 2025">
+      <figcaption>BTC — trajektori inventori (rata-rata harian dari data jam), 2025</figcaption>
+    </figure>
+    <figure>
+      <img src="output_hourly/figures/langkah4_ETH_trajectory_hourly.png" alt="ETH: trajektori inventori per jam, backtest 2025">
+      <figcaption>ETH — trajektori inventori (rata-rata harian dari data jam), 2025</figcaption>
+    </figure>
+  </div>
+  <div class="note warn">
+    Grafik dan tabel lain ada di <code>output_hourly/</code>. Data per jam tidak
+    disertakan di repo (lisensi CC BY-NC-SA 4.0); cara mengunduhnya ada di README.
+  </div>
+</section>
+
 <section id="alat">
   <h2>Alat operasional (tidak di-host di halaman ini)</h2>
   <p>
     Dua alat operasional dari Tahap 5 memakai data <strong>live</strong> dari Yahoo
     Finance dan butuh runtime Python — keduanya tidak bisa berjalan di GitHub Pages
-    (hosting statis saja), jadi ditautkan sebagai layanan terpisah:
+    (hosting statis saja), jadi dijalankan terpisah:
   </p>
   <ul>
     <li>
       <strong>Dasbor interaktif</strong> (input inventori → rekomendasi restock
-      real-time) — deploy di Streamlit Community Cloud. Tautan akan ditambahkan di
-      sini setelah repo di-deploy.
+      real-time) — <code>scripts/Tahap_5_Prototipe_Pelaporan/02_dashboard_app.py</code>,
+      dijalankan lokal dengan <code>streamlit run</code>. Belum di-deploy sebagai
+      layanan publik.
     </li>
     <li>
       <strong>Alat CLI</strong> (<code>scripts/Tahap_5_Prototipe_Pelaporan/01_decision_tool_cli.py</code>) —
@@ -298,7 +351,8 @@
 </main>
 
 <footer>
-  Sumber data: Yahoo Finance (BTC-USD, ETH-USD), 2022-01-01 s/d 2025-12-31 · Kode
+  Sumber data: Yahoo Finance (BTC-USD, ETH-USD), 2022-01-01 s/d 2025-12-31; Tahap 6:
+  CryptoDataDownload (Binance, 1 jam, CC BY-NC-SA 4.0) · Kode
   sumber lengkap dan log eksekusi ada di repo ini
   (<code>scripts/</code>, <code>output/logs/</code>) · Dibuat untuk hibah LPPM ITK 2026.
 </footer>
