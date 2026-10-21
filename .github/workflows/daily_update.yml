@@ -23,8 +23,12 @@
 name: Update Dashboard Data
 
 on:
-  schedule:
-    - cron: "10 0 * * *"   # setiap hari 00:10 UTC
+  # Jadwal harian dimatikan (21 Okt 2026): data/latest.json belum dibaca
+  # komponen mana pun (dasbor Streamlit memakai yfinance langsung), sehingga
+  # commit otomatis harian hanya menambah riwayat. Aktifkan lagi bila sudah
+  # ada konsumen:
+  # schedule:
+  #   - cron: "10 0 * * *"   # setiap hari 00:10 UTC
   workflow_dispatch: {}     # tombol "Run workflow" manual di tab Actions
 
 permissions:
