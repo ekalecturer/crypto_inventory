@@ -1,24 +1,19 @@
 {
-  "generated_at_utc": "2026-10-21T04:33:48.378746+00:00",
+  "generated_at_utc": "2026-10-22T04:32:23.702109+00:00",
   "note": "Dasbor demo -- current_inventory_proxy BUKAN input operator riil, lihat docstring skrip ini. Data 1 hari lag (cron harian).",
   "assets": {
     "BTC": {
       "asset": "BTC",
       "ticker": "BTC-USD",
-      "as_of_date": "2026-10-21",
-      "elasticity": -2.5745,
-      "safety_stock": 50864.68,
-      "reorder_point": 558737.9,
-      "target_inventory_p95": 555360.77,
-      "current_inventory_proxy": 310949.69,
+      "as_of_date": "2026-10-22",
+      "elasticity": -2.5709,
+      "safety_stock": 48810.98,
+      "reorder_point": 556834.56,
+      "target_inventory_p95": 551557.14,
+      "current_inventory_proxy": 418723.67,
       "restock_recommended": true,
       "n_exponent_clipped": 0,
       "trend_30d": [
-        {
-          "date": "2026-09-22",
-          "close": 86172.28125,
-          "volume": 473478.09749437263
-        },
         {
           "date": "2026-09-23",
           "close": 84383.0078125,
@@ -156,33 +151,33 @@
         },
         {
           "date": "2026-10-20",
-          "close": 82288.234375,
-          "volume": 304674.01828888035
+          "close": 82941.0,
+          "volume": 325528.7525831615
         },
         {
           "date": "2026-10-21",
-          "close": 82722.9296875,
-          "volume": 310949.6865400171
+          "close": 82881.83984375,
+          "volume": 372126.2100480539
+        },
+        {
+          "date": "2026-10-22",
+          "close": 82822.6796875,
+          "volume": 418723.6675129463
         }
       ]
     },
     "ETH": {
       "asset": "ETH",
       "ticker": "ETH-USD",
-      "as_of_date": "2026-10-21",
-      "elasticity": -2.4482,
-      "safety_stock": 1098865.86,
-      "reorder_point": 9224149.97,
-      "target_inventory_p95": 9149661.04,
-      "current_inventory_proxy": 4404081.86,
+      "as_of_date": "2026-10-22",
+      "elasticity": -2.4458,
+      "safety_stock": 1051635.94,
+      "reorder_point": 9171723.61,
+      "target_inventory_p95": 9136886.28,
+      "current_inventory_proxy": 5846336.3,
       "restock_recommended": true,
       "n_exponent_clipped": 0,
       "trend_30d": [
-        {
-          "date": "2026-09-22",
-          "close": 2752.632568359375,
-          "volume": 5605695.674158518
-        },
         {
           "date": "2026-09-23",
           "close": 2684.69189453125,
@@ -320,13 +315,18 @@
         },
         {
           "date": "2026-10-20",
-          "close": 2423.0975341796875,
-          "volume": 3997772.987813335
+          "close": 2446.730712890625,
+          "volume": 4517039.358999558
         },
         {
           "date": "2026-10-21",
-          "close": 2441.3798828125,
-          "volume": 4404081.863578526
+          "close": 2445.2353515625,
+          "volume": 5181687.831818178
+        },
+        {
+          "date": "2026-10-22",
+          "close": 2443.739990234375,
+          "volume": 5846336.304636798
         }
       ]
     }
