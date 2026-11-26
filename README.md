@@ -5,6 +5,8 @@ Hibah Penelitian LPPM ITK, 2026.
 
 **Hasil (GitHub Pages):** https://ekalecturer.github.io/crypto_inventory/
 
+**Simulasi interaktif (browser):** https://ekalecturer.github.io/crypto_inventory/simulasi/
+
 **Dasbor interaktif (Streamlit):** belum di-deploy sebagai layanan publik;
 jalankan lokal dengan `streamlit run scripts/Tahap_5_Prototipe_Pelaporan/02_dashboard_app.py`.
 

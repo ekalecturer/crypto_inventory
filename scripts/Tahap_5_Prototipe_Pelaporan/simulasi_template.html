@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulasi Interaktif — Inventori Kripto (Bootstrap Monte Carlo, SS/ROP)</title>
+<style>
+  :root { --navy:#1E2761; --ice:#CADCFC; --accent:#F2A65A; --grey:#5B6472; --red:#B3261E; --green:#1B7A43; --bg:#F7F8FA; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:#1a1a2e; line-height:1.55; }
+  header { background:var(--navy); color:#fff; padding:2.2rem 1.5rem 1.8rem; }
+  header .wrap, main, footer { max-width:1000px; margin:0 auto; }
+  header h1 { margin:0 0 .4rem; font-size:1.55rem; }
+  header p { margin:.2rem 0; color:var(--ice); font-size:.95rem; }
+  header a { color:var(--ice); }
+  main { padding:1.8rem 1.5rem 3rem; }
+  h2 { color:var(--navy); border-bottom:2px solid var(--ice); padding-bottom:.4rem; font-size:1.2rem; margin-top:2.4rem; }
+  .note { background:#fff; border-left:4px solid var(--accent); padding:.8rem 1rem; font-size:.9rem; color:var(--grey); margin:1rem 0; border-radius:0 6px 6px 0; }
+  .panel { background:#fff; border-radius:10px; box-shadow:0 1px 3px rgba(0,0,0,.08); padding:1.1rem 1.2rem; margin:1rem 0; }
+  .controls { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:.9rem 1.2rem; }
+  label { display:block; font-size:.82rem; color:var(--grey); font-weight:600; margin-bottom:.2rem; }
+  select, input[type=number], input[type=date] { width:100%; padding:.4rem .5rem; border:1px solid #cfd4de; border-radius:6px; font-size:.92rem; background:#fff; }
+  input[type=range] { width:100%; }
+  .val { font-weight:700; color:var(--navy); }
+  button { background:var(--navy); color:#fff; border:0; border-radius:8px; padding:.6rem 1.3rem; font-size:.95rem; font-weight:600; cursor:pointer; margin-top:1rem; }
+  button:hover { background:#2b3a8a; }
+  button:disabled { opacity:.55; cursor:wait; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:.8rem; margin-top:1rem; }
+  .card { background:#f1f4fb; border-radius:8px; padding:.7rem .9rem; }
+  .card .k { font-size:.76rem; color:var(--grey); }
+  .card .n { font-size:1.15rem; font-weight:700; color:var(--navy); font-variant-numeric:tabular-nums; }
+  .card.ok { background:#e6f4ec; } .card.alert { background:#fdeceb; }
+  .card.ok .n { color:var(--green); } .card.alert .n { color:var(--red); }
+  canvas { width:100%; display:block; margin-top:.8rem; }
+  table { width:100%; border-collapse:collapse; background:#fff; font-size:.88rem; margin:1rem 0; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  th,td { text-align:left; padding:.5rem .7rem; border-bottom:1px solid #e8e8ee; }
+  th { background:var(--navy); color:#fff; font-weight:600; }
+  td.num { text-align:right; font-variant-numeric:tabular-nums; }
+  .yes { color:var(--green); font-weight:600; } .no { color:var(--red); font-weight:600; }
+  .bar { height:8px; background:#e3e7f0; border-radius:4px; overflow:hidden; margin-top:.7rem; display:none; }
+  .bar div { height:100%; width:0; background:var(--accent); transition:width .1s; }
+  .legend span { display:inline-block; margin-right:1rem; font-size:.8rem; color:var(--grey); }
+  .legend i { display:inline-block; width:12px; height:3px; margin-right:.3rem; vertical-align:middle; }
+  footer { padding:1.5rem; color:var(--grey); font-size:.82rem; border-top:1px solid #e8e8ee; }
+  a { color:var(--navy); } code { background:#eef0f5; padding:.1rem .35rem; border-radius:4px; font-size:.85em; }
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>Simulasi Interaktif Inventori Aset Kripto</h1>
+  <p>Bootstrap Monte Carlo + <i>Safety Stock</i> / <i>Reorder Point</i> pada bursa kripto terpusat. Berjalan penuh di browser Anda.</p>
+  <p><a href="../">← Kembali ke hasil backtest</a> · Hibah Penelitian LPPM ITK 2026</p>
+</div></header>
+<main>
+
+<div class="note">
+  Halaman ini memakai data harian BTC-USD dan ETH-USD dari Yahoo Finance (2022-01-02 s.d. 2025-12-31) dan rumus yang sama dengan kode Python di repositori.
+  Volume adalah agregat pasar global, bukan <i>order book</i> satu bursa, sehingga angka mutlak tidak mewakili cadangan nyata suatu bursa.
+  Hasil di sini bukan saran operasional atau investasi.
+</div>
+
+<h2>1. Rekomendasi pada satu hari</h2>
+<p>Pilih aset dan tanggal acuan. Simulasi mengambil sampel acak (<i>bootstrap</i>) dari <i>log-return</i> historis sampai tanggal itu, mengubahnya menjadi skenario permintaan lewat elastisitas harga-permintaan, lalu menghitung SS, ROP, dan jumlah pesanan.</p>
+<div class="panel">
+  <div class="controls">
+    <div><label for="asset1">Aset</label><select id="asset1"><option>BTC</option><option>ETH</option></select></div>
+    <div><label for="asof">Tanggal acuan</label><input type="date" id="asof"></div>
+    <div><label for="n1">Jumlah skenario N <span class="val" id="n1v"></span></label><input type="range" id="n1" min="1000" max="50000" step="1000" value="10000"></div>
+    <div><label for="L1">Lead time L (hari) <span class="val" id="L1v"></span></label><input type="range" id="L1" min="1" max="7" step="1" value="1"></div>
+    <div><label for="sl1"><i>Service level</i></label><select id="sl1"><option value="1.2816">90%</option><option value="1.645" selected>95%</option><option value="1.96">97,5%</option><option value="2.326">99%</option></select></div>
+    <div><label for="clip1">Batas eksponen (<i>clip</i>) <span class="val" id="clip1v"></span></label><input type="range" id="clip1" min="1" max="10" step="0.5" value="10"></div>
+    <div><label for="inv1">Inventori saat ini (unit aset)</label><input type="number" id="inv1" min="0" step="any"></div>
+    <div><label for="seed1"><i>Seed</i> acak</label><input type="number" id="seed1" value="42" step="1"></div>
+  </div>
+  <button id="run1">Jalankan simulasi</button>
+  <div class="cards" id="cards1"></div>
+  <canvas id="hist" height="300"></canvas>
+  <div class="legend" id="legend1"></div>
+</div>
+
+<h2>2. Backtest walk-forward 2025 di browser</h2>
+<p>Mengulang protokol Bab 3.6 pada 365 hari out-of-sample 2025. Elastisitas diestimasi sekali pada jendela kalibrasi 2022-2024, simulasi dijalankan ulang setiap hari dengan data sampai hari itu, dan kebijakan dinamis dibandingkan dengan <i>fixed buffer</i> statis.</p>
+<div class="panel">
+  <div class="controls">
+    <div><label for="asset2">Aset</label><select id="asset2"><option>BTC</option><option>ETH</option></select></div>
+    <div><label for="n2">Skenario per hari N <span class="val" id="n2v"></span></label><input type="range" id="n2" min="1000" max="20000" step="1000" value="10000"></div>
+    <div><label for="L2">Lead time L (hari) <span class="val" id="L2v"></span></label><input type="range" id="L2" min="1" max="5" step="1" value="1"></div>
+    <div><label for="sl2"><i>Service level</i></label><select id="sl2"><option value="1.2816">90%</option><option value="1.645" selected>95%</option><option value="1.96">97,5%</option><option value="2.326">99%</option></select></div>
+    <div><label for="buf2">Buffer baseline (% rata-rata 30 hari) <span class="val" id="buf2v"></span></label><input type="range" id="buf2" min="80" max="200" step="5" value="110"></div>
+    <div><label for="hold2">Biaya holding (bps/hari) <span class="val" id="hold2v"></span></label><input type="range" id="hold2" min="0.5" max="10" step="0.5" value="2"></div>
+    <div><label for="seed2"><i>Seed</i> acak</label><input type="number" id="seed2" value="42" step="1"></div>
+  </div>
+  <button id="run2">Jalankan backtest 2025</button>
+  <div class="bar" id="bar2"><div></div></div>
+  <div id="out2"></div>
+  <canvas id="traj" height="320"></canvas>
+  <div class="legend" id="legend2"></div>
+</div>
+
+<h2>Cara membaca dan batasan</h2>
+<ul>
+  <li>Hasil resmi laporan memakai Python (<code>numpy</code>, seed 42, N = 10.000). Generator angka acak di browser berbeda, sehingga angka Anda bergeser sedikit, tetapi kesimpulan kualitatifnya sama.</li>
+  <li>Nilai p di tabel memakai aproksimasi normal untuk uji-t berpasangan (n = 365). Nilai di bawah 0,001 ditampilkan sebagai &lt;0,001.</li>
+  <li>Biaya holding memakai asumsi 2 bps per hari atas nilai inventori. Proposal tidak menetapkan angkanya, jadi ubah sesuai kebutuhan.</li>
+  <li>Backtest menganggap pengisian tiba pada hari yang sama dan permintaan yang tidak terpenuhi hilang (tanpa <i>backlog</i>).</li>
+  <li>Halaman ini hanya mencakup resolusi harian. Uji ketahanan per jam (Tahap 6) menunjukkan pola <i>trade-off</i> yang berbeda; lihat <a href="../">halaman hasil</a>.</li>
+</ul>
+</main>
+<footer>
+  Kode sumber: <a href="https://github.com/ekalecturer/crypto_inventory">github.com/ekalecturer/crypto_inventory</a>
+  (<code>scripts/Tahap_5_Prototipe_Pelaporan/04_build_simulasi_html.py</code> membangun halaman ini dari data yang sama dengan pipeline Python).
+</footer>
+
+<script>
+const DATA = __DATA__;
+
+//<CORE>
+const CAL_END = "2024-12-31", BT_START = "2025-01-01", BT_END = "2025-12-31";
+
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+function addDays(startStr, i){const d=new Date(startStr+"T00:00:00Z");d.setUTCDate(d.getUTCDate()+i);return d.toISOString().slice(0,10);}
+function indexOfDate(asset, dateStr){const s=new Date(DATA[asset].start+"T00:00:00Z"),d=new Date(dateStr+"T00:00:00Z");return Math.round((d-s)/86400000);}
+
+// regresi log-log: ln(volume) = a + beta * r
+function estimateElasticity(r, v, n){
+  let mx=0,my=0; const ly=new Float64Array(n);
+  for(let i=0;i<n;i++){ly[i]=Math.log(Math.max(v[i],1e-8));mx+=r[i];my+=ly[i];}
+  mx/=n; my/=n; let sxy=0,sxx=0;
+  for(let i=0;i<n;i++){sxy+=(r[i]-mx)*(ly[i]-my);sxx+=(r[i]-mx)*(r[i]-mx);}
+  return sxx===0?0:sxy/sxx;
+}
+
+// simulasi bootstrap untuk satu hari acuan i (memakai data indeks 0..i)
+function simulateDay(a, i, volMean, beta, L, N, rng, clip, keepCum){
+  const r=a.r, total=N*L, dem=new Float64Array(total), m=i+1;
+  let sum=0;
+  for(let k=0;k<total;k++){
+    let e=beta*r[Math.floor(rng()*m)];
+    if(e>clip)e=clip; else if(e<-clip)e=-clip;
+    const d=volMean*Math.exp(e); dem[k]=d; sum+=d;
+  }
+  const mean=sum/total; let ss=0;
+  for(let k=0;k<total;k++){const x=dem[k]-mean;ss+=x*x;}
+  const sigma=Math.sqrt(ss/(total-1));
+  const cum=new Float64Array(N);
+  for(let n=0;n<N;n++){let c=0;for(let l=0;l<L;l++)c+=dem[n*L+l];cum[n]=c;}
+  const sorted=Float64Array.from(cum).sort();
+  const pos=0.95*(N-1), lo=Math.floor(pos), hi=Math.ceil(pos);
+  const p95=sorted[lo]+(sorted[hi]-sorted[lo])*(pos-lo);
+  return {sigma, dbar:mean, p95, cum: keepCum?cum:null};
+}
+
+function meanRange(arr,from,to){let s=0;for(let i=from;i<=to;i++)s+=arr[i];return s/(to-from+1);}
+function meanFirst(arr,n){let s=0;for(let i=0;i<n;i++)s+=arr[i];return s/n;}
+
+function normSf2(t){ // p dua sisi, aproksimasi normal
+  const x=Math.abs(t)/Math.SQRT2, tt=1/(1+0.3275911*x);
+  const y=1-(((((1.061405429*tt-1.453152027)*tt)+1.421413741)*tt-0.284496736)*tt+0.254829592)*tt*Math.exp(-x*x);
+  return 1-y;
+}
+function pairedT(a,b){
+  const n=a.length; let md=0; for(let i=0;i<n;i++)md+=a[i]-b[i]; md/=n;
+  let v=0; for(let i=0;i<n;i++){const d=a[i]-b[i]-md;v+=d*d;} v/=(n-1);
+  const se=Math.sqrt(v/n); const t=se===0?0:md/se;
+  return {t, p: se===0?1:normSf2(t), meanDiff: md};
+}
+
+function runBacktest(asset, opt, onProgress){
+  const a=DATA[asset], rng=mulberry32(opt.seed);
+  const calibEnd=indexOfDate(asset,CAL_END), btStart=indexOfDate(asset,BT_START), btEnd=indexOfDate(asset,BT_END);
+  const beta=estimateElasticity(a.r,a.v,calibEnd+1);
+  let invP=meanRange(a.v,calibEnd-29,calibEnd), invB=invP;
+  const days=btEnd-btStart+1;
+  const res={beta, days:[], invP:[], invB:[], rop:[], ss:[], stoP:new Float64Array(days), stoB:new Float64Array(days), holdP:new Float64Array(days), holdB:new Float64Array(days), resP:new Float64Array(days), resB:new Float64Array(days)};
+  let sumVol=0; for(let j=0;j<=btStart-1;j++)sumVol+=a.v[j];
+  const stepFn=(idx)=>{
+    const d=idx-btStart; sumVol+=a.v[idx];
+    const volMean=sumVol/(idx+1);
+    const out=simulateDay(a,idx,volMean,beta,opt.L,opt.N,rng,opt.clip,false);
+    const ss=opt.z*out.sigma*Math.sqrt(opt.L), rop=out.dbar*opt.L+ss;
+    // kebijakan diusulkan
+    const demand=a.v[idx], price=a.c[idx];
+    const trig=invP<=rop, q=trig?Math.max(0,out.p95-invP+ss):0, after=invP+q;
+    const so=demand>after; const end=Math.max(0,after-demand);
+    res.stoP[d]=so?1:0; res.resP[d]=trig?1:0; res.holdP[d]=end*price*opt.hold; invP=end;
+    // baseline
+    const buf=meanRange(a.v,idx-29,idx)*opt.buf;
+    const trigB=invB<=buf, qB=trigB?Math.max(0,buf-invB):0, afterB=invB+qB;
+    const soB=demand>afterB; const endB=Math.max(0,afterB-demand);
+    res.stoB[d]=soB?1:0; res.resB[d]=trigB?1:0; res.holdB[d]=endB*price*opt.hold; invB=endB;
+    res.days.push(addDays(a.start,idx)); res.invP.push(end); res.invB.push(endB); res.rop.push(rop); res.ss.push(ss);
+  };
+  return {res, days, btStart, stepFn, finalize:()=>{
+    const mean=x=>{let s=0;for(let i=0;i<x.length;i++)s+=x[i];return s/x.length;};
+    res.m={ sto:[mean(res.stoP),mean(res.stoB)], hold:[mean(res.holdP),mean(res.holdB)], rs:[mean(res.resP),mean(res.resB)] };
+    res.t={ sto:pairedT(res.stoP,res.stoB), hold:pairedT(res.holdP,res.holdB), rs:pairedT(res.resP,res.resB) };
+    return res;}};
+}
+//</CORE>
+
+// ---------- UI ----------
+const fmt=(x,d=0)=>x.toLocaleString("id-ID",{maximumFractionDigits:d,minimumFractionDigits:d});
+const pct=x=>(x*100).toLocaleString("id-ID",{maximumFractionDigits:2,minimumFractionDigits:2})+"%";
+const pv=p=>p<0.001?"<0,001":fmt(p,3);
+const $=id=>document.getElementById(id);
+
+function bindRange(id, outId, f){const el=$(id),o=$(outId);const u=()=>{o.textContent=f?f(el.value):el.value;};el.addEventListener("input",u);u();}
+bindRange("n1","n1v",v=>fmt(+v)); bindRange("L1","L1v"); bindRange("clip1","clip1v");
+bindRange("n2","n2v",v=>fmt(+v)); bindRange("L2","L2v"); bindRange("buf2","buf2v",v=>v+"%"); bindRange("hold2","hold2v");
+
+function setupDate(){
+  const a=$("asset1").value, s=DATA[a].start, n=DATA[a].r.length;
+  const el=$("asof"); el.min=addDays(s,180); el.max=addDays(s,n-1);
+  if(!el.value||el.value<el.min||el.value>el.max) el.value=el.max;
+  defaultInv();
+}
+function defaultInv(){
+  const a=$("asset1").value, i=indexOfDate(a,$("asof").value);
+  $("inv1").value=Math.round(meanRange(DATA[a].v,i-29,i));
+}
+$("asset1").addEventListener("change",setupDate);
+$("asof").addEventListener("change",defaultInv);
+setupDate();
+
+function setupCanvas(c){const dpr=window.devicePixelRatio||1,w=c.clientWidth,h=+c.getAttribute("height");c.width=w*dpr;c.height=h*dpr;const g=c.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w,h);return {g,w,h};}
+function axisTicks(lo,hi,n){const step=(hi-lo)/n;return Array.from({length:n+1},(_,i)=>lo+i*step);}
+
+function drawHist(cum, marks){
+  const {g,w,h}=setupCanvas($("hist")); const padL=60,padR=14,padT=14,padB=34;
+  const bins=60; let lo=Infinity,hi=-Infinity; for(const x of cum){if(x<lo)lo=x;if(x>hi)hi=x;}
+  for(const m of marks){if(m.x<lo)lo=m.x*0.98;if(m.x>hi)hi=m.x*1.02;}
+  const cnt=new Array(bins).fill(0), bw=(hi-lo)/bins;
+  for(const x of cum){cnt[Math.min(bins-1,Math.floor((x-lo)/bw))]++;}
+  const mx=Math.max(...cnt), X=v=>padL+(v-lo)/(hi-lo)*(w-padL-padR), Y=v=>h-padB-v/mx*(h-padT-padB);
+  g.fillStyle="#9fb3e6"; for(let i=0;i<bins;i++){g.fillRect(X(lo+i*bw),Y(cnt[i]),Math.max(1,X(lo+(i+1)*bw)-X(lo+i*bw)-1),h-padB-Y(cnt[i]));}
+  g.strokeStyle="#888"; g.lineWidth=1; g.beginPath(); g.moveTo(padL,h-padB); g.lineTo(w-padR,h-padB); g.stroke();
+  g.fillStyle="#5B6472"; g.font="11px sans-serif"; g.textAlign="center";
+  for(const t of axisTicks(lo,hi,5)){g.fillText(fmt(t),X(t),h-padB+16);}
+  g.textAlign="left"; g.fillText("Permintaan kumulatif L hari (unit aset)",padL,h-4);
+  for(const m of marks){g.strokeStyle=m.c;g.lineWidth=2;g.setLineDash(m.dash||[]);g.beginPath();g.moveTo(X(m.x),padT);g.lineTo(X(m.x),h-padB);g.stroke();}
+  g.setLineDash([]);
+}
+
+$("run1").addEventListener("click",()=>{
+  const asset=$("asset1").value, a=DATA[asset], i=indexOfDate(asset,$("asof").value);
+  const N=+$("n1").value, L=+$("L1").value, z=+$("sl1").value, clip=+$("clip1").value, inv=+$("inv1").value;
+  const calibEnd=indexOfDate(asset,CAL_END);
+  const beta=estimateElasticity(a.r,a.v,Math.min(i,calibEnd)+1);
+  const volMean=meanFirst(a.v,i+1);
+  const rng=mulberry32(+$("seed1").value||42);
+  const o=simulateDay(a,i,volMean,beta,L,N,rng,clip,true);
+  const ss=z*o.sigma*Math.sqrt(L), rop=o.dbar*L+ss, target=o.p95;
+  const restock=inv<=rop, q=restock?Math.max(0,target-inv+ss):0;
+  const buf=meanRange(a.v,i-29,i)*1.10;
+  const card=(k,n,cls="")=>`<div class="card ${cls}"><div class="k">${k}</div><div class="n">${n}</div></div>`;
+  $("cards1").innerHTML=
+    card("Elastisitas β",fmt(beta,4))+card("σ permintaan harian",fmt(o.sigma))+card("Rata-rata permintaan harian",fmt(o.dbar))+
+    card("Safety Stock (SS)",fmt(ss))+card("Reorder Point (ROP)",fmt(rop))+card("Target inventori (P95)",fmt(target))+
+    card("Buffer baseline (110%)",fmt(buf))+
+    card("Rekomendasi",restock?"Isi ulang "+fmt(q):"Belum perlu isi ulang",restock?"alert":"ok");
+  drawHist(o.cum,[{x:rop,c:"#F2A65A"},{x:target,c:"#B3261E",dash:[6,4]},{x:buf,c:"#1B7A43",dash:[2,3]},{x:inv,c:"#1E2761"}]);
+  $("legend1").innerHTML='<span><i style="background:#F2A65A"></i>ROP</span><span><i style="background:#B3261E"></i>Target P95</span><span><i style="background:#1B7A43"></i>Buffer baseline</span><span><i style="background:#1E2761"></i>Inventori saat ini</span>';
+});
+
+function drawTraj(res){
+  const {g,w,h}=setupCanvas($("traj")); const padL=64,padR=14,padT=14,padB=30;
+  const n=res.days.length; const series=[{d:res.invP,c:"#1E2761"},{d:res.invB,c:"#1B7A43"},{d:res.rop,c:"#F2A65A"}];
+  let hi=0; for(const s of series)for(const x of s.d)if(x>hi)hi=x; hi*=1.05;
+  const X=i=>padL+i/(n-1)*(w-padL-padR), Y=v=>h-padB-v/hi*(h-padT-padB);
+  g.strokeStyle="#e3e7f0"; g.fillStyle="#5B6472"; g.font="11px sans-serif"; g.textAlign="right";
+  for(const t of axisTicks(0,hi,4)){g.beginPath();g.moveTo(padL,Y(t));g.lineTo(w-padR,Y(t));g.stroke();g.fillText(fmt(t),padL-6,Y(t)+4);}
+  g.textAlign="center"; for(const k of [0,Math.floor(n/3),Math.floor(2*n/3),n-1]) g.fillText(res.days[k],X(k),h-padB+16);
+  for(const s of series){g.strokeStyle=s.c;g.lineWidth=1.5;g.beginPath();s.d.forEach((v,i)=>{i?g.lineTo(X(i),Y(v)):g.moveTo(X(i),Y(v));});g.stroke();}
+}
+
+$("run2").addEventListener("click",async()=>{
+  const btn=$("run2"); btn.disabled=true; $("out2").innerHTML=""; const bar=$("bar2"); bar.style.display="block"; const fill=bar.firstElementChild; fill.style.width="0";
+  const asset=$("asset2").value;
+  const opt={N:+$("n2").value,L:+$("L2").value,z:+$("sl2").value,clip:10,buf:+$("buf2").value/100,hold:+$("hold2").value/10000,seed:+$("seed2").value||42};
+  const bt=runBacktest(asset,opt);
+  for(let d=0;d<bt.days;d++){
+    bt.stepFn(bt.btStart+d);
+    if(d%10===9){fill.style.width=((d+1)/bt.days*100)+"%"; await new Promise(r=>setTimeout(r,0));}
+  }
+  const res=bt.finalize(); fill.style.width="100%";
+  const sigSto=res.t.sto.p<0.05, sigHold=res.t.hold.p<0.05;
+  const betterSto=sigSto&&res.t.sto.meanDiff<0, betterHold=sigHold&&res.t.hold.meanDiff<0;
+  const mark=(sig,better)=>sig?(better?'<span class="yes">Ya (diusulkan lebih baik)</span>':'<span class="no">Ya (diusulkan lebih buruk)</span>'):'Tidak signifikan';
+  const ref=asset==="BTC"
+    ?{sto:["8,49%","33,70%"],hold:["6.740.510","2.339.719"],rs:["100,00%","100,00%"]}
+    :{sto:["61,92%","32,05%"],hold:["427.342","1.255.350"],rs:["99,73%","100,00%"]};
+  $("out2").innerHTML=
+   `<p>Elastisitas hasil kalibrasi 2022-2024 untuk ${asset}: <strong>${fmt(res.beta,4)}</strong> (resmi Python: ${asset==="BTC"?"-1,0552":"-1,0839"}). Hari yang dibandingkan: ${res.days.length}.</p>
+    <table><tr><th>Metrik</th><th>Diusulkan (MC), live</th><th>Baseline, live</th><th>p-value</th><th>Signifikan?</th><th>Resmi (Python), diusulkan vs baseline</th></tr>
+    <tr><td>Tingkat <i>stockout</i></td><td class="num">${pct(res.m.sto[0])}</td><td class="num">${pct(res.m.sto[1])}</td><td class="num">${pv(res.t.sto.p)}</td><td>${mark(sigSto,betterSto)}</td><td class="num">${ref.sto[0]} vs ${ref.sto[1]}</td></tr>
+    <tr><td>Biaya holding harian rata-rata (USD)</td><td class="num">${fmt(res.m.hold[0])}</td><td class="num">${fmt(res.m.hold[1])}</td><td class="num">${pv(res.t.hold.p)}</td><td>${mark(sigHold,betterHold)}</td><td class="num">${ref.hold[0]} vs ${ref.hold[1]}</td></tr>
+    <tr><td>Frekuensi pengisian ulang</td><td class="num">${pct(res.m.rs[0])}</td><td class="num">${pct(res.m.rs[1])}</td><td class="num">${pv(res.t.rs.p)}</td><td>${res.t.rs.p<0.05?"Ya":"Tidak signifikan"}</td><td class="num">${ref.rs[0]} vs ${ref.rs[1]}</td></tr></table>
+    <p>${betterSto&&betterHold?"Kriteria superioritas proposal terpenuhi pada pengaturan ini (stockout dan biaya holding keduanya signifikan lebih rendah).":"Kriteria superioritas proposal tidak terpenuhi pada pengaturan ini: stockout dan biaya holding tidak keduanya signifikan lebih rendah dari baseline."}</p>`;
+  drawTraj(res);
+  $("legend2").innerHTML='<span><i style="background:#1E2761"></i>Inventori diusulkan</span><span><i style="background:#1B7A43"></i>Inventori baseline</span><span><i style="background:#F2A65A"></i>ROP harian</span>';
+  btn.disabled=false; setTimeout(()=>{bar.style.display="none";},600);
+});
+</script>
+</body>
+</html>
